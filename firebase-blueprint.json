@@ -1,0 +1,132 @@
+{
+  "entities": {
+    "users": {
+      "path": "/users/{userId}",
+      "description": "User profile and root ownership boundary",
+      "fields": {
+        "uid": "string",
+        "email": "string",
+        "displayName": "string",
+        "createdAt": "timestamp",
+        "lastActiveAt": "timestamp"
+      },
+      "subcollections": [
+        "conversations",
+        "memories",
+        "goals",
+        "tasks",
+        "insights",
+        "dailyBriefs",
+        "settings"
+      ]
+    },
+    "conversations": {
+      "path": "/users/{userId}/conversations/{conversationId}",
+      "description": "Multi-turn user conversation threads with Gemini",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "title": "string",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp",
+        "messageCount": "number",
+        "summary": "map"
+      },
+      "subcollections": ["messages"]
+    },
+    "messages": {
+      "path": "/users/{userId}/conversations/{conversationId}/messages/{messageId}",
+      "description": "Individual turns between user and AURA model",
+      "fields": {
+        "id": "string",
+        "conversationId": "string",
+        "userId": "string",
+        "role": "string",
+        "content": "string",
+        "createdAt": "timestamp",
+        "contextUsed": "list"
+      }
+    },
+    "memories": {
+      "path": "/users/{userId}/memories/{memoryId}",
+      "description": "Selectively extracted persistent user intelligence",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "title": "string",
+        "content": "string",
+        "category": "string",
+        "importance": "number",
+        "sourceConversationId": "string",
+        "createdAt": "timestamp",
+        "lastAccessedAt": "timestamp"
+      }
+    },
+    "goals": {
+      "path": "/users/{userId}/goals/{goalId}",
+      "description": "User objectives discovered or defined in conversations",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "title": "string",
+        "description": "string",
+        "status": "string",
+        "priority": "string",
+        "targetDate": "string",
+        "createdAt": "timestamp"
+      }
+    },
+    "tasks": {
+      "path": "/users/{userId}/tasks/{taskId}",
+      "description": "Action items extracted from chat",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "goalId": "string",
+        "title": "string",
+        "status": "string",
+        "dueDate": "string",
+        "createdAt": "timestamp"
+      }
+    },
+    "insights": {
+      "path": "/users/{userId}/insights/{insightId}",
+      "description": "Synthesized patterns and themes across conversations",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "title": "string",
+        "content": "string",
+        "category": "string",
+        "createdAt": "timestamp"
+      }
+    },
+    "dailyBriefs": {
+      "path": "/users/{userId}/dailyBriefs/{briefId}",
+      "description": "Personalized daily brief synthesized by Gemini",
+      "fields": {
+        "id": "string",
+        "userId": "string",
+        "date": "string",
+        "recentSummary": "string",
+        "focusRecommendation": "string",
+        "pendingTasksCount": "number",
+        "activeGoalsCount": "number",
+        "keyPatterns": "list",
+        "createdAt": "timestamp"
+      }
+    },
+    "settings": {
+      "path": "/users/{userId}/settings/config",
+      "description": "Privacy Center controls and configuration",
+      "fields": {
+        "userId": "string",
+        "memoryEnabled": "boolean",
+        "personalizationEnabled": "boolean",
+        "insightsEnabled": "boolean",
+        "driveSyncEnabled": "boolean",
+        "updatedAt": "timestamp"
+      }
+    }
+  }
+}

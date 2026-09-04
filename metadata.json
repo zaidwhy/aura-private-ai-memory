@@ -1,0 +1,8 @@
+{
+  "name": "Remix AURA - Private AI Memory Layer",
+  "description": "A secure, authenticated personal AI workspace that transforms natural conversations into private memories, goals, tasks, and insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

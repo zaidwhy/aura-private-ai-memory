@@ -1,0 +1,128 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Default Deny Catch-all (Security Net)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Root user document
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false; // Blanket enumeration of users is strictly forbidden
+      allow create, update: if isOwner(userId) && isValidId(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 320;
+      allow delete: if isOwner(userId) && isValidId(userId);
+
+      // Conversations Subcollection
+      match /conversations/{conversationId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow create: if isOwner(userId) && isValidId(userId) && isValidId(conversationId)
+          && request.resource.data.userId == userId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200;
+        allow update: if isOwner(userId) && isValidId(userId) && isValidId(conversationId)
+          && request.resource.data.userId == userId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200;
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(conversationId);
+
+        // Messages Subcollection
+        match /messages/{messageId} {
+          allow get, list: if isOwner(userId) && isValidId(userId) && isValidId(conversationId);
+          allow create: if isOwner(userId) && isValidId(userId) && isValidId(conversationId) && isValidId(messageId)
+            && request.resource.data.userId == userId
+            && request.resource.data.role in ['user', 'model', 'system']
+            && request.resource.data.content is string
+            && request.resource.data.content.size() <= 25000;
+          allow update: if false; // Messages are immutable history
+          allow delete: if isOwner(userId) && isValidId(userId) && isValidId(conversationId) && isValidId(messageId);
+        }
+      }
+
+      // Memories Subcollection
+      match /memories/{memoryId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow create, update: if isOwner(userId) && isValidId(userId) && isValidId(memoryId)
+          && request.resource.data.userId == userId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 160
+          && request.resource.data.content is string
+          && request.resource.data.content.size() <= 4000
+          && request.resource.data.category in ['goal', 'preference', 'project', 'important_fact', 'recurring_theme'];
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(memoryId);
+      }
+
+      // Goals Subcollection
+      match /goals/{goalId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow create, update: if isOwner(userId) && isValidId(userId) && isValidId(goalId)
+          && request.resource.data.userId == userId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200
+          && request.resource.data.status in ['active', 'completed', 'archived'];
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(goalId);
+      }
+
+      // Tasks Subcollection
+      match /tasks/{taskId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow create, update: if isOwner(userId) && isValidId(userId) && isValidId(taskId)
+          && request.resource.data.userId == userId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200
+          && request.resource.data.status in ['pending', 'completed'];
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(taskId);
+      }
+
+      // Insights Subcollection
+      match /insights/{insightId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow create, update: if isOwner(userId) && isValidId(userId) && isValidId(insightId)
+          && request.resource.data.userId == userId
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200
+          && request.resource.data.content is string
+          && request.resource.data.content.size() <= 4000;
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(insightId);
+      }
+
+      // Daily Briefs Subcollection
+      match /dailyBriefs/{briefId} {
+        allow get, list: if isOwner(userId) && isValidId(userId);
+        allow create, update: if isOwner(userId) && isValidId(userId) && isValidId(briefId)
+          && request.resource.data.userId == userId
+          && request.resource.data.recentSummary is string
+          && request.resource.data.recentSummary.size() <= 6000;
+        allow delete: if isOwner(userId) && isValidId(userId) && isValidId(briefId);
+      }
+
+      // Privacy Settings Single Document
+      match /settings/{configId} {
+        allow get: if isOwner(userId) && isValidId(userId);
+        allow create, update: if isOwner(userId) && isValidId(userId)
+          && request.resource.data.userId == userId
+          && request.resource.data.memoryEnabled is bool
+          && request.resource.data.personalizationEnabled is bool
+          && request.resource.data.insightsEnabled is bool;
+        allow delete: if isOwner(userId) && isValidId(userId);
+      }
+    }
+  }
+}
