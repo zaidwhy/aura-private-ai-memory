@@ -1,5 +1,10 @@
 # AURA: Your Private AI Memory Layer
 
+> **Status (2026-09-27): archived, read-only.** Built on 2026-09-05 for the GenAI Academy / Google
+> Cloud Run AI Challenge, starting from a Google AI Studio scaffold. Not deployed or maintained since;
+> the setup and deployment steps below are the submission's and have not been re-verified. The Firebase
+> values in `firebase-applet-config.json` are a web client config, which Firebase treats as public.
+
 > GenAI Academy / Google Cloud Run AI Challenge Submission
 > Resource Label: `dev-tutorial=cloud-run-ai-challenge`
 
